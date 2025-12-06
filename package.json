@@ -1,0 +1,64 @@
+{
+  "name": "split-and-join",
+  "displayName": "Split and Join",
+  "description": "Split and join arguments, similar to mini.splitjoin.",
+  "icon": "images/icon.png",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.106.1"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+      "onCommand:extension.splitAndJoin.toggle"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "splitAndJoin.toggle",
+        "title": "Split/Join Arguments"
+      }
+    ],
+    "configuration": {
+      "properties": {
+          "splitAndJoin.separators": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [",", ";"],
+          "description": "List of characters to detect as separators (e.g., comma, semicolon)."
+        },
+        "splitAndJoin.delimiters": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["()", "[]", "{}"],
+          "description": "List of delimiter pairs. First character is opening, last is closing (e.g. '()' or '<>')."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.106.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^9.36.0",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
