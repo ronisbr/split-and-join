@@ -4,6 +4,7 @@
   "description": "Split and join arguments, similar to mini.splitjoin.",
   "icon": "images/icon.png",
   "version": "0.0.1",
+  "publisher": "ronisbr",
   "engines": {
     "vscode": "^1.106.1"
   },
