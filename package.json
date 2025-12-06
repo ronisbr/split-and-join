@@ -7,8 +7,12 @@
   "engines": {
     "vscode": "^1.106.1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ronisbr/split-and-join"
+  },
   "categories": [
-    "Other"
+    "Formatters"
   ],
   "activationEvents": [
       "onCommand:extension.splitAndJoin.toggle"
