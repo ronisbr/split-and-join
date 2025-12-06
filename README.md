@@ -1,7 +1,11 @@
 # Split and Join for VS Code
 
+<p align="center">
+  <img src="./images/icon.png" width="128" title="split-and-join"><br>
+</p>
+
 This extension provides a way to split and join arguments similar to the plugin
-[mini.splijoin](https://github.com/nvim-mini/mini.splitjoin).
+[mini.splitjoin](https://github.com/nvim-mini/mini.splitjoin).
 
 ## Features
 
