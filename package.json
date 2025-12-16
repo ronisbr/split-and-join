@@ -3,7 +3,7 @@
   "displayName": "Split and Join",
   "description": "Split and join arguments, similar to mini.splitjoin.",
   "icon": "images/icon.png",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "publisher": "ronisbr",
   "engines": {
     "vscode": "^1.106.1"
@@ -16,7 +16,7 @@
     "Formatters"
   ],
   "activationEvents": [
-      "onCommand:extension.splitAndJoin.toggle"
+    "onCommand:extension.splitAndJoin.toggle"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -28,12 +28,15 @@
     ],
     "configuration": {
       "properties": {
-          "splitAndJoin.separators": {
+        "splitAndJoin.separators": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "default": [",", ";"],
+          "default": [
+            ",",
+            ";"
+          ],
           "description": "List of characters to detect as separators (e.g., comma, semicolon)."
         },
         "splitAndJoin.delimiters": {
@@ -41,7 +44,11 @@
           "items": {
             "type": "string"
           },
-          "default": ["()", "[]", "{}"],
+          "default": [
+            "()",
+            "[]",
+            "{}"
+          ],
           "description": "List of delimiter pairs. First character is opening, last is closing (e.g. '()' or '<>')."
         }
       }
