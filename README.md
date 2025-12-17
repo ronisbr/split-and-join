@@ -7,6 +7,8 @@
 This extension provides a way to split and join arguments similar to the plugin
 [mini.splitjoin](https://github.com/nvim-mini/mini.splitjoin).
 
+![Split and Join Showcase](images/showcase.gif)
+
 ## Features
 
 The user can configure a set of delimiters and separators. The plugin provides a single
