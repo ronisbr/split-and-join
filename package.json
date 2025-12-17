@@ -16,7 +16,7 @@
     "Formatters"
   ],
   "activationEvents": [
-    "onCommand:extension.splitAndJoin.toggle"
+    "onCommand:splitAndJoin.toggle"
   ],
   "main": "./out/extension.js",
   "contributes": {
