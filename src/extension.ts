@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 /******************************************************************************************
  *                                     Configuration                                      *
@@ -7,15 +7,13 @@ import * as vscode from 'vscode';
 /**
  * Defines the structure of the extension's configuration.
  *
- * @property separators  - Set of all separator characters.
- * @property delimiters  - Array of delimiter pairs (opening and closing).
- * @property openToClose - Map from opening delimiter to closing delimiter.
- * @property allOpen     - Set of all opening delimiters.
- * @property allClose    - Set of all closing delimiters.
+ * @property separators Set of all separator characters.
+ * @property openToClose Map from opening delimiter to closing delimiter.
+ * @property allOpen Set of all opening delimiters.
+ * @property allClose Set of all closing delimiters.
  */
 interface Config {
     separators: Set<string>;
-    delimiters: { open: string; close: string }[];
     openToClose: Map<string, string>;
     allOpen: Set<string>;
     allClose: Set<string>;
@@ -33,9 +31,6 @@ function getConfiguration(): Config {
 
     // Get list of delimiters from configuration.
     const rawDelimiters = config.get<string[]>("delimiters") || ['()', '[]', '{}'];
-
-    const delimiters: { open: string; close: string }[] = [];
-
     // Map from opening delimiter to closing delimiter.
     const openToClose = new Map<string, string>();
     // Set of all opening delimiters.
@@ -52,13 +47,12 @@ function getConfiguration(): Config {
         const open  = pair.charAt(0);
         const close = pair.charAt(pair.length - 1);
 
-        delimiters.push({ open, close });
         openToClose.set(open, close);
         allOpen.add(open);
         allClose.add(close);
     }
 
-    return {separators, delimiters, openToClose, allOpen, allClose};
+    return {separators, openToClose, allOpen, allClose};
 }
 
 /******************************************************************************************
@@ -82,58 +76,61 @@ function findEnclosingBrackets(
     const text   = doc.getText();
     const offset = doc.offsetAt(cursor);
 
-    let openIndex  = -1;
-    let closeIndex = -1;
-    let balance    =  0;
+    type StackItem = { char: string; index: number };
+    const stack: StackItem[] = [];
+    let enclosing: { openIndex: number; closeIndex: number } | null = null;
 
-    // Search backwards for opening delimiters.
-    for (let i = offset; i >= 0; i--) {
+    let inString: string | null = null;
+
+    for (let i = 0; i < text.length; i++) {
         const char = text[i];
 
-        if (config.allClose.has(char)) {
-            balance++;
+        if (inString) {
+            if (char === inString) {
+                // Count consecutive backslashes before the quote.
+                let backslashCount = 0;
+
+                for (let j = i - 1; j >= 0 && text[j] === '\\'; j--) {
+                    backslashCount++;
+                }
+
+                // Quote is escaped if odd number of backslashes.
+                if (backslashCount % 2 === 0) {
+                    inString = null;
+                }
+            }
+            continue;
+        }
+
+        // Enter string.
+        if (char === '"' || char === "'" || char === '`') {
+            inString = char;
             continue;
         }
 
         if (config.allOpen.has(char)) {
-            if (balance === 0) {
-                openIndex = i;
-                break;
-            }
+            stack.push({ char, index: i });
+        } else if (config.allClose.has(char)) {
+            const top = stack[stack.length - 1];
 
-            balance--;
+            if (top && config.openToClose.get(top.char) === char) {
+                const open = stack.pop()!;
+
+                if (open.index <= offset && offset <= i) {
+                    if (!enclosing || open.index > enclosing.openIndex) {
+                        enclosing = { openIndex: open.index, closeIndex: i };
+                    }
+                }
+            }
         }
     }
 
-    if (openIndex === -1) return null;
+    if (!enclosing) return null;
 
-    const openChar      = text[openIndex];
-    const expectedClose = config.openToClose.get(openChar);
-
-    // Search forwards for closing delimiter.
-    balance = 0;
-
-    for (let i = openIndex + 1; i < text.length; i++) {
-        const char = text[i];
-
-        if (char === openChar) {
-            balance++;
-            continue;
-        }
-
-        if (char === expectedClose) {
-            if (balance === 0) {
-                closeIndex = i;
-                break;
-            }
-
-            balance--;
-        }
-    }
-
-    if (closeIndex === -1) return null;
-
-    return new vscode.Range(doc.positionAt(openIndex), doc.positionAt(closeIndex + 1));
+    return new vscode.Range(
+        doc.positionAt(enclosing.openIndex),
+        doc.positionAt(enclosing.closeIndex + 1)
+    );
 }
 
 /**
@@ -147,11 +144,22 @@ function findSeparators(text: string, config: Config): { index: number; char: st
 
     for (let i = 0; i < text.length; i++) {
         const char = text[i];
-        const prev = text[i - 1];
 
         // String Skipping.
         if (inString) {
-            if (char === inString && prev !== '\\') inString = null;
+            if (char === inString) {
+                // Count consecutive backslashes before the quote.
+                let backslashCount = 0;
+
+                for (let j = i - 1; j >= 0 && text[j] === '\\'; j--) {
+                    backslashCount++;
+                }
+
+                // Quote is escaped if odd number of backslashes.
+                if (backslashCount % 2 === 0) {
+                    inString = null;
+                }
+            }
             continue;
         }
 
@@ -174,7 +182,7 @@ function findSeparators(text: string, config: Config): { index: number; char: st
         // Separator Detection (Union Check).
         // Check if current char is in the set of configured separators.
         if (stack.length === 0 && config.separators.has(char)) {
-            results.push({ index: i, char: char });
+            results.push({ index: i, char });
         }
     }
 
@@ -224,8 +232,8 @@ function joinContent(
 
         // Check if the last character is one of our valid separators.
         if (config.separators.has(lastChar)) {
-            // If so, remove the trailing separator.
-            joined = joined.substring(0, joined.length - 1);
+            // If so, remove the trailing separator and trim again.
+            joined = joined.substring(0, joined.length - 1).trim();
         }
     }
 
@@ -254,7 +262,8 @@ function splitContent(
     // Find all occurrences of any configured separator.
     const separatorOccurrences = findSeparators(content, config);
 
-    if (separatorOccurrences.length === 0 && content.trim().length === 0) return;
+    // If no separators found, don't split (even if content exists)
+    if (separatorOccurrences.length === 0) return;
 
     // Obtain the current indentation setup.
     const options      = editor.options;
