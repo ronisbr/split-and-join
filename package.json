@@ -3,7 +3,7 @@
   "displayName": "Split and Join",
   "description": "Split and join arguments, similar to mini.splitjoin.",
   "icon": "images/icon.png",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "ronisbr",
   "engines": {
     "vscode": "^1.106.1"
