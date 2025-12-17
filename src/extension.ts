@@ -295,7 +295,7 @@ function splitContent(
  * Toggles between splitting and joining content within the nearest enclosing delimiter.
  * @param editor Current text editor.
  */
-function toggleSplitJoin(editor: vscode.TextEditor) {
+function toggleSplitJoin(editor: vscode.TextEditor): Thenable<boolean> | undefined {
     const doc    = editor.document;
     const cursor = editor.selection.active;
     const config = getConfiguration();
@@ -304,13 +304,13 @@ function toggleSplitJoin(editor: vscode.TextEditor) {
 
     if (!range) {
         vscode.window.showInformationMessage("No enclosing delimiter found.");
-        return;
+        return Promise.resolve(false);
     }
 
     const text        = doc.getText(range);
     const isMultiLine = range.start.line !== range.end.line;
 
-    editor.edit(
+    return editor.edit(
         editBuilder => {
             if (isMultiLine) {
                 joinContent(editBuilder, range, text, config);
@@ -329,7 +329,7 @@ export function activate(context: vscode.ExtensionContext) {
     const disposable = vscode.commands.registerCommand("splitAndJoin.toggle", () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) return;
-        toggleSplitJoin(editor);
+        return toggleSplitJoin(editor);
     });
 
     context.subscriptions.push(disposable);
